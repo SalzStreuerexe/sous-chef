@@ -58,7 +58,6 @@
         .nav-btn.active .nav-icon-bg { background-color: #eff6ff; }
         .dark .nav-btn.active .nav-icon-bg { background-color: rgba(30, 58, 138, 0.5); }
 
-        /* Steuerungsklassen für die Rollen */
         .admin-only { transition: all 0.3s; }
         .koch-admin-only { transition: all 0.3s; }
     </style>
@@ -108,6 +107,10 @@
                 Anmelden
             </button>
         </div>
+        <!-- NOTFALL RESET BUTTON -->
+        <button onclick="emergencyReset()" class="absolute bottom-3 left-0 right-0 text-[10px] text-gray-400 opacity-50 hover:opacity-100 uppercase tracking-widest font-bold">
+            App Reset
+        </button>
     </div>
 </div>
 
@@ -141,17 +144,14 @@
                     <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 flex items-center justify-center mr-3"><i class="fas fa-fire"></i></div>
                     Live-Service
                 </button>
-                <!-- Nur sichtbar für Koch und Admin -->
                 <button onclick="showSection('planning')" id="btn-desk-planning" class="koch-admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 flex items-center justify-center mr-3"><i class="fas fa-book-open"></i></div>
                     Menüs
                 </button>
-                <!-- Nur sichtbar für Koch und Admin -->
                 <button onclick="showSection('inventory')" id="btn-desk-inventory" class="koch-admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/50 text-green-600 flex items-center justify-center mr-3"><i class="fas fa-boxes"></i></div>
                     Lager & Check
                 </button>
-                <!-- Nur sichtbar für Admin -->
                 <button onclick="showSection('accounts')" id="btn-desk-accounts" class="admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/50 text-red-600 flex items-center justify-center mr-3"><i class="fas fa-users-cog"></i></div>
                     Konten
@@ -412,7 +412,6 @@
                 </div>
             </section>
 
-            <!-- NEUE SEKTION: KONTEN (Nur Admin) -->
             <section id="section-accounts" class="hidden glass-card rounded-3xl p-4 md:p-6 shadow-2xl border dark:border-gray-700">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-3 md:gap-4">
                     <h2 class="text-2xl md:text-3xl font-black text-gray-800 dark:text-white flex items-center">
@@ -464,17 +463,14 @@
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-fire text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Live</span>
         </button>
-        <!-- Nur sichtbar für Koch und Admin -->
         <button onclick="showSection('planning')" id="btn-mob-planning" class="koch-admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-book-open text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Menüs</span>
         </button>
-        <!-- Nur sichtbar für Koch und Admin -->
         <button onclick="showSection('inventory')" id="btn-mob-inventory" class="koch-admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-boxes text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Lager</span>
         </button>
-        <!-- Nur sichtbar für Admin -->
         <button onclick="showSection('accounts')" id="btn-mob-accounts" class="admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-users-cog text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Konten</span>
@@ -485,13 +481,13 @@
 <script>
     // ================= SUPABASE KONFIGURATION =================
     // TODO: Trage deine echte Projekt-URL ein!
-    const SUPABASE_URL = "DEINE_SUPABASE_URL";
+    const SUPABASE_URL = "https://vgpwfpfghegpkcaquxie.supabase.co";
     // TODO: Trage deinen echten Anon-Key ein!
-    const SUPABASE_KEY = "DEIN_ANON_KEY";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncHdmcGZnaGVncGtjYXF1eGllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQ3MDcsImV4cCI6MjA5NjIwMDcwN30.k_qHwoIfCPVfgHsyaD6kxRO3e1OwhDqhrWMfzs4BLgk";
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let userRole = 'service'; // Standardrolle vor Login
+    let userRole = 'service'; 
 
     const defaultProds = {
         "Salz (fein)": { qty: 5000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 1000 },
@@ -528,12 +524,28 @@
 
     // ================= EIGENES IN-APP AUTH SYSTEM =================
     
+    function emergencyReset() {
+        localStorage.clear();
+        window.location.reload();
+    }
+
     function checkSession() {
         updateThemeUI();
-        const storedUser = localStorage.getItem('sc_user');
+        let storedUser = null;
+        
+        // Sicherheits-Check: Falls der lokale Speicher kaputt ist
+        try {
+            const rawData = localStorage.getItem('sc_user');
+            if(rawData) {
+                storedUser = JSON.parse(rawData);
+                if(!storedUser || !storedUser.username) storedUser = null;
+            }
+        } catch(e) {
+            localStorage.removeItem('sc_user');
+        }
         
         if (storedUser) {
-            setupUserEnv(JSON.parse(storedUser));
+            setupUserEnv(storedUser);
         } else {
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('app').classList.add('hidden');
@@ -551,9 +563,9 @@
             const { data, error } = await db.from('app_state').select('data').eq('key', 'users').single();
             
             let usersList = [];
-            if (error || !data) {
+            if (error || !data || !data.data || data.data.length === 0) {
                 usersList = [{ username: 'chef', pass: '1234', role: 'admin' }];
-                await db.from('app_state').insert({ key: 'users', data: usersList });
+                await saveToCloud('users', usersList);
             } else {
                 usersList = data.data;
             }
@@ -600,18 +612,16 @@
             const adminElements = document.querySelectorAll('.admin-only');
             const kochAdminElements = document.querySelectorAll('.koch-admin-only');
             
-            // Erstmal alles einblenden (Reset)
             for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = '';
             for(let i=0; i<kochAdminElements.length; i++) kochAdminElements[i].style.display = '';
             
-            // Ansicht basierend auf Rolle zuschneiden
             if(userRole === 'admin') {
                 roleBadge.innerHTML = `<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin (${userObj.username})`;
             } else if(userRole === 'koch') {
                 roleBadge.innerHTML = `<i class="fas fa-fire text-orange-500 mr-1"></i> Koch (${userObj.username})`;
                 for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = 'none';
             } else {
-                roleBadge.innerHTML = `<i class="fas fa-concierge-bell text-blue-500 mr-1"></i> Kellner (${userObj.username})`;
+                roleBadge.innerHTML = `<i class="fas fa-concierge-bell text-blue-500 mr-1"></i> Service (${userObj.username})`;
                 for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = 'none';
                 for(let i=0; i<kochAdminElements.length; i++) kochAdminElements[i].style.display = 'none';
             }
@@ -633,6 +643,12 @@
                 if (row.key === 'savedMenus') state.savedMenus = row.data;
                 if (row.key === 'roadmapEvents') state.roadmapEvents = row.data;
                 if (row.key === 'users') state.users = row.data;
+            }
+
+            // Sicherstellen, dass User immer existieren (Selbstheilung)
+            if (!state.users || state.users.length === 0) {
+                state.users = [{ username: 'chef', pass: '1234', role: 'admin' }];
+                await saveToCloud('users', state.users);
             }
 
             if (!state.inventory || Object.keys(state.inventory).length < 2) {
@@ -668,16 +684,14 @@
         showSection('roadmap'); 
     }
 
+    // SICHERES SPEICHERN MIT UPSERT
     async function saveToCloud(key, jsonData) {
         try {
             const { error } = await db
                 .from('app_state')
-                .update({ data: jsonData, updated_at: new Date() })
-                .eq('key', key);
+                .upsert({ key: key, data: jsonData, updated_at: new Date() }, { onConflict: 'key' });
             
-            if (error) {
-                await db.from('app_state').insert({ key: key, data: jsonData });
-            }
+            if (error) throw error;
         } catch (err) {
             console.error(`Fehler beim Speichern von ${key}:`, err);
             showToast("Speichern fehlgeschlagen!", "error");
@@ -689,6 +703,8 @@
     function renderUsers() {
         const list = document.getElementById('users-list');
         list.innerHTML = '';
+        
+        if(!state.users) state.users = []; // Falls undefiniert
         
         for(let i=0; i<state.users.length; i++) {
             const u = state.users[i];
@@ -727,6 +743,7 @@
         
         if(!name || !pass) return showToast("Bitte Name und Passwort eingeben", "error");
         
+        if(!state.users) state.users = [];
         for(let i=0; i<state.users.length; i++) {
             if(state.users[i].username === name) return showToast("Dieser Name existiert bereits", "error");
         }
