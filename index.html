@@ -404,7 +404,7 @@
     const KUECHEN_PIN = "1234"; 
 
     // Supabase Client initialisieren
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Komplette Fine-Dining Zutatenliste restauriert
     const defaultProds = {
@@ -537,7 +537,7 @@
 
         try {
             // Daten parallel aus der Cloud laden
-            const { data: dbData, error } = await supabase.from('app_state').select('key, data');
+            const { data: dbData, error } = await db.from('app_state').select('key, data');
             if (error) throw error;
 
             dbData.forEach(row => {
@@ -580,7 +580,7 @@
 
     async function saveToCloud(key, jsonData) {
         try {
-            const { error } = await supabase
+            const { error } = await db
                 .from('app_state')
                 .update({ data: jsonData, updated_at: new Date() })
                 .eq('key', key);
