@@ -57,10 +57,12 @@
         .dark .nav-btn.active { color: #60a5fa; }
         .nav-btn.active .nav-icon-bg { background-color: #eff6ff; }
         .dark .nav-btn.active .nav-icon-bg { background-color: rgba(30, 58, 138, 0.5); }
+
+        .admin-only { transition: all 0.3s; }
     </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 bg-cover bg-center bg-fixed" style="background-image: url('https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?q=80&w=2070&auto=format&fit=crop');" onload="initApp()">
+<body class="bg-gray-100 dark:bg-gray-900 bg-cover bg-center bg-fixed" style="background-image: url('https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?q=80&w=2070&auto=format&fit=crop');" onload="checkSession()">
 
 <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-[9999] flex flex-col items-center pointer-events-none"></div>
 
@@ -80,7 +82,34 @@
     </div>
 </div>
 
-<div id="app" class="flex flex-col md:flex-row h-screen overflow-hidden relative">
+<div id="login-screen" class="fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-500 bg-gray-100 dark:bg-gray-900 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?q=80&w=2070&auto=format&fit=crop');">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-md"></div>
+    <div class="glass-card relative z-10 p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-sm mx-4 border dark:border-gray-700 text-center transform transition-transform">
+        <div class="w-20 h-20 bg-indigo-500 text-white rounded-2xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-lg">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <h1 class="text-3xl font-black text-gray-800 dark:text-white mb-2 tracking-tight">Sous-Chef <span class="text-indigo-500">OS</span></h1>
+        <p class="text-gray-500 dark:text-gray-300 font-medium mb-8">System-Anmeldung</p>
+        
+        <div class="space-y-4">
+            <div class="relative">
+                <i class="fas fa-user absolute left-4 top-4 text-gray-400"></i>
+                <input type="text" id="login-username" placeholder="Benutzername" class="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-bold transition shadow-inner" onkeypress="if(event.key === 'Enter') handleLogin()">
+            </div>
+            <div class="relative">
+                <i class="fas fa-lock absolute left-4 top-4 text-gray-400"></i>
+                <input type="password" id="login-pass" placeholder="Passwort" class="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-600 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 font-bold tracking-wider transition shadow-inner" onkeypress="if(event.key === 'Enter') handleLogin()">
+            </div>
+            <p id="login-error" class="text-red-500 text-sm font-bold opacity-0 transition-opacity"><i class="fas fa-exclamation-triangle mr-1"></i> Falsche Daten</p>
+            
+            <button id="login-btn" onclick="handleLogin()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-lg transition shadow-lg hover:shadow-indigo-500/30 mt-2">
+                Anmelden
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="app" class="hidden flex flex-col md:flex-row h-screen overflow-hidden relative">
     
     <header class="md:hidden glass-panel flex justify-between items-center p-4 sticky top-0 z-40 shadow-sm border-b dark:border-gray-700">
         <h1 class="text-xl font-black text-indigo-700 dark:text-indigo-400 tracking-tight">Sous-Chef <span class="text-xs align-top">V30</span></h1>
@@ -89,8 +118,8 @@
                 <input type="checkbox" id="theme-toggle-mob" class="sr-only peer" onchange="toggleTheme()">
                 <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner border border-gray-400 dark:border-gray-500"></div>
             </label>
-            <button onclick="requestClearRoadmap()" class="w-10 h-10 rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 flex items-center justify-center shadow-sm">
-                <i class="fas fa-broom"></i>
+            <button onclick="handleLogout()" class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center shadow-sm">
+                <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
     </header>
@@ -99,6 +128,7 @@
         <div>
             <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                 <h1 class="text-2xl font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-tight">Sous-Chef <span class="text-sm align-top">V30</span></h1>
+                <p id="user-role-badge" class="text-xs font-bold mt-1 text-gray-500 uppercase"></p>
             </div>
             <nav class="p-4 space-y-2">
                 <button onclick="showSection('roadmap')" id="btn-desk-roadmap" class="desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
@@ -121,14 +151,17 @@
         </div>
         
         <div class="p-6 border-t dark:border-gray-700 space-y-4">
-            <button onclick="requestClearRoadmap()" class="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold border border-red-200 dark:border-red-800/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition shadow-sm">
+            <button onclick="requestClearRoadmap()" class="admin-only w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold border border-red-200 dark:border-red-800/50 hover:bg-red-100 dark:hover:bg-red-900/40 transition shadow-sm">
                 <i class="fas fa-broom mr-2"></i> Tag leeren
             </button>
-            <div class="flex justify-center w-full pt-2">
+            <div class="flex justify-between items-center w-full pt-2">
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="theme-toggle-desk" class="sr-only peer" onchange="toggleTheme()">
                     <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner border border-gray-400 dark:border-gray-500"></div>
                 </label>
+                <button onclick="handleLogout()" class="text-gray-500 hover:text-red-500 font-bold text-sm transition">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
             </div>
         </div>
     </aside>
@@ -151,21 +184,21 @@
                 <div class="mb-8 p-4 md:p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-md flex flex-col md:flex-row gap-3 md:gap-4 items-end">
                     <div class="w-full flex gap-3 md:contents">
                         <div class="w-1/2 md:w-32">
-                            <label class="block block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Zeit</label>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Zeit</label>
                             <input type="time" id="new-event-time" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition text-sm md:text-base">
                         </div>
                         <div class="w-1/2 md:w-32">
-                            <label class="block block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Tisch / Name</label>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Tisch / Name</label>
                             <input type="text" id="new-event-table" placeholder="z.B. T12" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm md:text-base">
                         </div>
                     </div>
                     <div class="w-full flex gap-3 md:contents">
                         <div class="w-1/3 md:w-24">
-                            <label class="block block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Pers.</label>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Pers.</label>
                             <input type="number" id="new-event-guests" min="1" value="2" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition text-center font-bold text-sm md:text-base">
                         </div>
                         <div class="w-2/3 md:w-48">
-                            <label class="block block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Typ</label>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Typ</label>
                             <select id="new-event-type" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-medium text-sm md:text-base">
                                 <option value="À-la-carte">À-la-carte</option>
                                 <option value="Veranstaltung">Veranstaltung</option>
@@ -177,8 +210,7 @@
                     </button>
                 </div>
 
-                <div id="roadmap-timeline" class="space-y-6 md:space-y-12 relative">
-                </div>
+                <div id="roadmap-timeline" class="space-y-6 md:space-y-12 relative"></div>
             </section>
 
             <section id="section-daily" class="hidden glass-card rounded-3xl p-4 md:p-6 shadow-2xl border dark:border-gray-700 md:h-[calc(100vh-8rem)] flex flex-col">
@@ -190,8 +222,7 @@
                 <div class="flex flex-col md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
                     <div class="w-full md:w-2/3 flex flex-col h-[40vh] md:h-auto">
                         <h3 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 md:mb-3 ml-1">Speisekarte (Antippen)</h3>
-                        <div id="pos-menu-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 overflow-y-auto custom-scrollbar pr-1 md:pr-2 pb-2 md:pb-4 flex-1 content-start">
-                        </div>
+                        <div id="pos-menu-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 overflow-y-auto custom-scrollbar pr-1 md:pr-2 pb-2 md:pb-4 flex-1 content-start"></div>
                     </div>
 
                     <div class="w-full md:w-1/3 flex flex-col bg-white dark:bg-gray-800 rounded-3xl border-2 border-orange-100 dark:border-orange-900/30 shadow-lg overflow-hidden h-[45vh] md:h-auto">
@@ -201,8 +232,7 @@
                             </h3>
                         </div>
                         
-                        <div id="pos-ticket-items" class="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]">
-                        </div>
+                        <div id="pos-ticket-items" class="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
 
                         <div class="p-3 md:p-4 bg-gray-50 dark:bg-gray-900/80 border-t border-gray-200 dark:border-gray-700 shrink-0">
                             <button onclick="requestBookTicket()" id="pos-book-btn" class="w-full py-3 md:py-4 bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-500 rounded-xl font-black text-lg md:text-xl transition flex items-center justify-center" disabled>
@@ -219,15 +249,14 @@
                     Gerichte & Menüs
                 </h2>
 
-                <div class="flex justify-center mb-6 md:mb-10">
+                <div class="flex justify-center mb-6 md:mb-10 admin-only">
                     <div onclick="loadTemplateForEditing('new')" class="template-card bg-purple-50 dark:bg-purple-900/20 border-2 border-dashed border-purple-400 dark:border-purple-600 rounded-2xl md:rounded-3xl p-4 md:p-6 w-full max-w-md flex flex-col items-center justify-center text-center shadow-md hover:bg-purple-100 dark:hover:bg-purple-900/40">
                         <i class="fas fa-plus-circle text-3xl md:text-4xl text-purple-500 mb-2 md:mb-3"></i>
                         <span class="font-black text-lg md:text-xl text-purple-700 dark:text-purple-300">Neues Gericht anlegen</span>
                     </div>
                 </div>
 
-                <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
-                </div>
+                <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8"></div>
 
                 <div id="template-editor-area" class="hidden mt-6 md:mt-10">
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border-2 border-purple-200 dark:border-purple-800 shadow-2xl p-4 md:p-8 relative">
@@ -245,8 +274,7 @@
                             </button>
                         </div>
 
-                        <div id="course-container" class="space-y-4 md:space-y-8">
-                        </div>
+                        <div id="course-container" class="space-y-4 md:space-y-8"></div>
 
                         <button onclick="addNewCourse()" class="mt-6 md:mt-8 w-full py-4 md:py-5 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 font-bold text-base md:text-xl transition flex items-center justify-center shadow-sm">
                             <i class="fas fa-plus-circle mr-2 md:mr-3"></i> Komponente hinzufügen
@@ -268,7 +296,40 @@
                     </div>
                 </div>
 
-                <div class="mb-6 md:mb-8 p-4 md:p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-md">
+                <div class="admin-only mb-8">
+                    <h3 class="text-lg md:text-xl font-black text-blue-600 dark:text-blue-400 mb-3 md:mb-4 flex items-center uppercase tracking-wide">
+                        <i class="fas fa-users-cog mr-2 md:mr-3"></i> System-Konten
+                    </h3>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 overflow-hidden shadow-sm p-4 md:p-5">
+                        <div class="flex flex-col lg:flex-row gap-3 items-end mb-6">
+                            <div class="w-full flex gap-3 lg:contents">
+                                <div class="w-1/2 lg:flex-1">
+                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Benutzername</label>
+                                    <input type="text" id="new-user-name" placeholder="z.B. service1" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
+                                </div>
+                                <div class="w-1/2 lg:flex-1">
+                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Passwort</label>
+                                    <input type="text" id="new-user-pass" placeholder="z.B. 1234" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
+                                </div>
+                            </div>
+                            <div class="w-full flex gap-3 lg:w-auto">
+                                <div class="flex-1 lg:w-48">
+                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Rolle</label>
+                                    <select id="new-user-role" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
+                                        <option value="service">Kellner (Service)</option>
+                                        <option value="admin">Admin (Chef)</option>
+                                    </select>
+                                </div>
+                                <button onclick="createNewUser()" class="px-6 py-2.5 md:py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/30 flex justify-center items-center mt-1 lg:mt-0">
+                                    <i class="fas fa-user-plus lg:mr-0 mr-2"></i> <span class="lg:hidden">Konto anlegen</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="users-list" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700"></div>
+                    </div>
+                </div>
+
+                <div class="admin-only mb-6 md:mb-8 p-4 md:p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-md">
                     <h3 class="font-bold mb-3 md:mb-4 dark:text-white text-xs md:text-sm uppercase tracking-wider text-gray-500">Neues Produkt aufnehmen</h3>
                     <div class="flex flex-col lg:flex-row gap-3 items-end">
                         <div class="w-full flex gap-3 lg:contents">
@@ -331,8 +392,7 @@
                             <div class="col-span-3">Neuer Bestand</div>
                             <div class="col-span-3 text-right">Aktion</div>
                         </div>
-                        <div id="inventory-list-order" class="flex flex-col divide-y divide-red-50 dark:divide-red-900/30">
-                        </div>
+                        <div id="inventory-list-order" class="flex flex-col divide-y divide-red-50 dark:divide-red-900/30"></div>
                     </div>
                 </div>
 
@@ -347,8 +407,7 @@
                             <div class="col-span-2">Min. Grenze</div>
                             <div class="col-span-3 text-right">Aktion</div>
                         </div>
-                        <div id="inventory-list-warning" class="flex flex-col divide-y divide-yellow-50 dark:divide-yellow-900/30">
-                        </div>
+                        <div id="inventory-list-warning" class="flex flex-col divide-y divide-yellow-50 dark:divide-yellow-900/30"></div>
                     </div>
                 </div>
 
@@ -364,8 +423,7 @@
                             <div class="col-span-2">Min.</div>
                             <div class="col-span-2 text-right">Aktionen</div>
                         </div>
-                        <div id="inventory-list-ok" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700/50">
-                        </div>
+                        <div id="inventory-list-ok" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700/50"></div>
                     </div>
                 </div>
 
@@ -396,104 +454,31 @@
 
 <script>
     // ================= SUPABASE KONFIGURATION =================
+    // TODO: Trage deine echte Projekt-URL ein!
     const SUPABASE_URL = "https://vgpwfpfghegpkcaquxie.supabase.co";
-    // TODO: Ersetze diesen Text mit deinem echten Anon-API Key aus deinen Supabase Settings!
+    // TODO: Trage deinen echten Anon-Key ein!
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncHdmcGZnaGVncGtjYXF1eGllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQ3MDcsImV4cCI6MjA5NjIwMDcwN30.k_qHwoIfCPVfgHsyaD6kxRO3e1OwhDqhrWMfzs4BLgk";
-    
-    // TODO: Such dir eine PIN aus, die du und dein Kumpel zum Starten eingeben müsst!
-    const KUECHEN_PIN = "1234"; 
 
     // Supabase Client initialisieren
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Komplette Fine-Dining Zutatenliste restauriert
+    let isAdmin = false; 
+
     const defaultProds = {
         "Salz (fein)": { qty: 5000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 1000 },
-        "Salz (grob)": { qty: 5000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 1000 },
         "Pfeffer (schwarz)": { qty: 1000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 200 },
-        "Pfeffer (weiß)": { qty: 1000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 200 },
-        "Zucker": { qty: 5000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 1000 },
-        "Muskatnuss": { qty: 200, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 50 },
-        "Paprikapulver (edelsüß)": { qty: 500, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 100 },
-        "Paprikapulver (geräuchert)": { qty: 500, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 100 },
-        "Chili": { qty: 300, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 50 },
-        "Lorbeerblätter": { qty: 100, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 20 },
-        "Kreuzkümmel (Cumin)": { qty: 400, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 50 },
-        "Koriandersamen": { qty: 400, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 50 },
-        "Senfsaat": { qty: 500, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 100 },
-        
-        "Petersilie": { qty: 500, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 100 },
-        "Schnittlauch": { qty: 300, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 50 },
-        "Basilikum": { qty: 300, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 50 },
-        "Thymian": { qty: 200, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 50 },
-        "Rosmarin": { qty: 200, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 50 },
-        "Estragon": { qty: 150, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 30 },
-        "Kerbel": { qty: 150, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 30 },
-        "Koriander (frisch)": { qty: 200, unit: "g", category: "Kräuter", manualStatus: 'none', minQty: 50 },
-        
-        "Zwiebeln": { qty: 10000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 2000 },
-        "Schalotten": { qty: 5000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 1000 },
-        "Knoblauch": { qty: 2000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 500 },
-        "Lauch": { qty: 3000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 500 },
-        "Karotten": { qty: 10000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 2000 },
-        "Sellerie (Knolle)": { qty: 4000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 1000 },
-        "Sellerie (Stange)": { qty: 2000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 500 },
-        "Ingwer": { qty: 1000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 200 },
-        "Zitronen": { qty: 30, unit: "Stk", category: "Aromaten", manualStatus: 'none', minQty: 10 },
-        "Limetten": { qty: 20, unit: "Stk", category: "Aromaten", manualStatus: 'none', minQty: 10 },
-        
-        "Kartoffeln": { qty: 25000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 5000 },
-        "Zucchini": { qty: 3000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 1000 },
-        "Aubergine": { qty: 2000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 500 },
-        "Paprika": { qty: 3000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 1000 },
-        "Brokkoli": { qty: 2000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 500 },
-        "Blumenkohl": { qty: 2000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 500 },
-        "Spinat": { qty: 1500, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 500 },
-        "Pilze (Champignons)": { qty: 3000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 1000 },
-        
-        "Orangen": { qty: 20, unit: "Stk", category: "Gemüse & Obst", manualStatus: 'none', minQty: 5 },
-        "Äpfel": { qty: 30, unit: "Stk", category: "Gemüse & Obst", manualStatus: 'none', minQty: 10 },
-        "Beeren": { qty: 1000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 200 },
-        "Birnen": { qty: 20, unit: "Stk", category: "Gemüse & Obst", manualStatus: 'none', minQty: 5 },
-        
         "Butter": { qty: 5000, unit: "g", category: "Fette & Öle", manualStatus: 'none', minQty: 1000 },
-        "Olivenöl": { qty: 3000, unit: "ml", category: "Fette & Öle", manualStatus: 'none', minQty: 1000 },
-        "Neutrales Öl": { qty: 10000, unit: "ml", category: "Fette & Öle", manualStatus: 'none', minQty: 2000 },
-        
         "Sahne": { qty: 5000, unit: "ml", category: "Molkerei", manualStatus: 'none', minQty: 1000 },
-        "Milch": { qty: 10000, unit: "ml", category: "Molkerei", manualStatus: 'none', minQty: 2000 },
-        "Crème fraîche": { qty: 2000, unit: "g", category: "Molkerei", manualStatus: 'none', minQty: 500 },
-        "Joghurt": { qty: 3000, unit: "g", category: "Molkerei", manualStatus: 'none', minQty: 1000 },
-        "Hartkäse (Parmesan)": { qty: 1500, unit: "g", category: "Molkerei", manualStatus: 'none', minQty: 500 },
-        "Weichkäse": { qty: 1000, unit: "g", category: "Molkerei", manualStatus: 'none', minQty: 200 },
-        "Frischkäse": { qty: 2000, unit: "g", category: "Molkerei", manualStatus: 'none', minQty: 500 },
-        
         "Rind": { qty: 5000, unit: "g", category: "Fleisch", manualStatus: 'none', minQty: 1000 },
-        "Geflügel": { qty: 5000, unit: "g", category: "Fleisch", manualStatus: 'none', minQty: 1000 },
         "Fisch (frisch)": { qty: 3000, unit: "g", category: "Fisch & Seafood", manualStatus: 'none', minQty: 1000 },
-        "Fisch (TK)": { qty: 2000, unit: "g", category: "Fisch & Seafood", manualStatus: 'none', minQty: 500 },
-        "Eier": { qty: 90, unit: "Stk", category: "Molkerei", manualStatus: 'none', minQty: 30 },
-        
-        "Mehl": { qty: 10000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 2000 },
-        "Reis": { qty: 5000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 1000 },
-        "Pasta": { qty: 5000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 1000 },
-        "Linsen": { qty: 2000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 500 },
-        "Kichererbsen": { qty: 2000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 500 },
-        "Nüsse": { qty: 1000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 200 },
-        "Semmelbrösel": { qty: 2000, unit: "g", category: "Trockensortiment", manualStatus: 'none', minQty: 500 },
-        
-        "Weißwein": { qty: 5000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 1000 },
-        "Rotwein": { qty: 5000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 1000 },
-        "Weißweinessig": { qty: 2000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 500 },
-        "Balsamico": { qty: 2000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 500 },
-        "Sojasauce": { qty: 1000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 200 },
-        "Brühe / Fonds": { qty: 5000, unit: "ml", category: "Flüssigkeiten", manualStatus: 'none', minQty: 1000 }
+        "Zwiebeln": { qty: 10000, unit: "g", category: "Aromaten", manualStatus: 'none', minQty: 2000 },
+        "Kartoffeln": { qty: 25000, unit: "g", category: "Gemüse & Obst", manualStatus: 'none', minQty: 5000 }
     };
 
     const allCategories = ["Gemüse & Obst", "Fleisch", "Fisch & Seafood", "Molkerei", "Trockensortiment", "Gewürze", "Kräuter", "Aromaten", "Fette & Öle", "Flüssigkeiten", "Sonstiges"];
 
-    // Globaler App State
     let state = {
+        users: [],
         roadmapEvents: [], 
         savedMenus: [], 
         activeTemplateId: null, 
@@ -512,51 +497,116 @@
         return [year, month, day].join('-');
     }
 
-    // App Initialisierung mit PIN-Schutz und Cloud-Abruf
-    async function initApp() {
-        const userInput = prompt("Bitte Küchen-PIN eingeben, um Sous-Chef OS zu starten:");
-        
-        if (userInput !== KUECHEN_PIN) {
-            alert("Falsche PIN! Zugriff verweigert.");
-            document.getElementById('app').innerHTML = `
-                <div class="h-screen w-screen flex items-center justify-center bg-gray-950 text-white font-bold text-xl p-4 text-center">
-                    <p><i class="fas fa-lock text-red-500 mr-2 block text-4xl mb-3"></i> Kein Zugriff.<br><span class="text-sm text-gray-400 font-medium">Bitte lade die Seite neu und gib die richtige PIN ein.</span></p>
-                </div>`;
-            return;
-        }
-
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+    // EIGENES IN-APP AUTH SYSTEM
+    function checkSession() {
         updateThemeUI();
+        const storedUser = localStorage.getItem('sc_user');
+        
+        if (storedUser) {
+            setupUserEnv(JSON.parse(storedUser));
+        } else {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+        }
+    }
 
+    async function handleLogin() {
+        const btn = document.getElementById('login-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Lade...';
+        
+        const username = document.getElementById('login-username').value.trim().toLowerCase();
+        const pass = document.getElementById('login-pass').value;
+        
+        try {
+            const { data, error } = await db.from('app_state').select('data').eq('key', 'users').single();
+            
+            let usersList = [];
+            if (error || !data) {
+                // Erstes mal überhaupt -> Erstelle Standard Admin
+                usersList = [{ username: 'chef', pass: '1234', role: 'admin' }];
+                await db.from('app_state').insert({ key: 'users', data: usersList });
+            } else {
+                usersList = data.data;
+            }
+            
+            let validUser = null;
+            for (let i = 0; i < usersList.length; i++) {
+                if (usersList[i].username === username && usersList[i].pass === pass) {
+                    validUser = usersList[i];
+                    break;
+                }
+            }
+            
+            if (validUser) {
+                localStorage.setItem('sc_user', JSON.stringify(validUser));
+                setupUserEnv(validUser);
+            } else {
+                const errorMsg = document.getElementById('login-error');
+                if(errorMsg) {
+                    errorMsg.classList.remove('opacity-0');
+                    setTimeout(() => errorMsg.classList.add('opacity-0'), 3000);
+                }
+                btn.innerHTML = 'Anmelden';
+            }
+        } catch (err) {
+            console.error("Login Fehler", err);
+            btn.innerHTML = 'Anmelden';
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('sc_user');
+        window.location.reload();
+    }
+
+    function setupUserEnv(userObj) {
+        document.getElementById('login-screen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            
+            isAdmin = (userObj.role === 'admin');
+            
+            const roleBadge = document.getElementById('user-role-badge');
+            if(isAdmin) {
+                roleBadge.innerHTML = `<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin (${userObj.username})`;
+            } else {
+                roleBadge.innerHTML = `<i class="fas fa-concierge-bell text-blue-500 mr-1"></i> Service (${userObj.username})`;
+                const adminElements = document.querySelectorAll('.admin-only');
+                for(let i=0; i<adminElements.length; i++) {
+                    adminElements[i].style.display = 'none';
+                }
+            }
+            initApp();
+        }, 400);
+    }
+
+    async function initApp() {
         document.getElementById('roadmap-date-selector').value = getTodayString();
 
         try {
-            // Daten parallel aus der Cloud laden
             const { data: dbData, error } = await db.from('app_state').select('key, data');
             if (error) throw error;
 
-            dbData.forEach(row => {
+            for (let i = 0; i < dbData.length; i++) {
+                const row = dbData[i];
                 if (row.key === 'inventory') state.inventory = row.data;
                 if (row.key === 'savedMenus') state.savedMenus = row.data;
                 if (row.key === 'roadmapEvents') state.roadmapEvents = row.data;
-            });
+                if (row.key === 'users') state.users = row.data;
+            }
 
-            // Wenn Cloud-Daten leer sind, Fallbacks schreiben
-            if (!state.inventory || Object.keys(state.inventory).length < 5) {
+            if (!state.inventory || Object.keys(state.inventory).length < 2) {
                 state.inventory = { ...defaultProds };
                 await saveToCloud('inventory', state.inventory);
             }
 
-            Object.keys(state.inventory).forEach(k => {
-                if(state.inventory[k].minQty === undefined) {
-                    state.inventory[k].minQty = 0;
+            const invKeys = Object.keys(state.inventory);
+            for(let i=0; i<invKeys.length; i++) {
+                if(state.inventory[invKeys[i]].minQty === undefined) {
+                    state.inventory[invKeys[i]].minQty = 0;
                 }
-            });
+            }
 
             let needsSave = false;
             for (let i = 0; i < state.roadmapEvents.length; i++) {
@@ -572,6 +622,7 @@
             showToast("Fehler beim Laden aus der Cloud!", "error");
         }
 
+        if(isAdmin) renderUsers();
         renderTemplateGrid();
         renderPosMenu();
         renderRoadmap();
@@ -584,12 +635,96 @@
                 .from('app_state')
                 .update({ data: jsonData, updated_at: new Date() })
                 .eq('key', key);
-            if (error) throw error;
+            
+            // Falls Key nicht existiert (z.B. wenn Tische vorher leer waren), lege ihn an
+            if (error) {
+                await db.from('app_state').insert({ key: key, data: jsonData });
+            }
         } catch (err) {
             console.error(`Fehler beim Speichern von ${key}:`, err);
             showToast("Speichern fehlgeschlagen!", "error");
         }
     }
+
+    // ================= KONTEN & RECHTE =================
+    
+    function renderUsers() {
+        const list = document.getElementById('users-list');
+        list.innerHTML = '';
+        
+        for(let i=0; i<state.users.length; i++) {
+            const u = state.users[i];
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700 last:border-0";
+            
+            const roleColor = u.role === 'admin' ? 'text-yellow-500' : 'text-blue-500';
+            const roleIcon = u.role === 'admin' ? 'fa-crown' : 'fa-concierge-bell';
+            const roleName = u.role === 'admin' ? 'Admin' : 'Service';
+            
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center ${roleColor}">
+                        <i class="fas ${roleIcon}"></i>
+                    </div>
+                    <div>
+                        <p class="font-black text-gray-800 dark:text-white">${u.username}</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${roleName} • Passwort: ${u.pass}</p>
+                    </div>
+                </div>
+                <button onclick="requestDeleteUser('${u.username}')" class="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center justify-center">
+                    <i class="fas fa-trash-alt text-sm"></i>
+                </button>
+            `;
+            list.appendChild(div);
+        }
+    }
+    
+    async function createNewUser() {
+        const name = document.getElementById('new-user-name').value.trim().toLowerCase();
+        const pass = document.getElementById('new-user-pass').value.trim();
+        const role = document.getElementById('new-user-role').value;
+        
+        if(!name || !pass) return showToast("Bitte Name und Passwort eingeben", "error");
+        
+        // Prüfen ob existiert
+        for(let i=0; i<state.users.length; i++) {
+            if(state.users[i].username === name) return showToast("Dieser Name existiert bereits", "error");
+        }
+        
+        state.users.push({ username: name, pass: pass, role: role });
+        await saveToCloud('users', state.users);
+        
+        document.getElementById('new-user-name').value = '';
+        document.getElementById('new-user-pass').value = '';
+        
+        renderUsers();
+        showToast(`Konto für ${name} angelegt.`);
+    }
+    
+    function requestDeleteUser(username) {
+        if(state.users.length <= 1) return showToast("Das letzte Konto kann nicht gelöscht werden", "error");
+        
+        openConfirmDialog("Konto löschen?", `Möchtest du das Konto von ${username} unwiderruflich löschen?`, async () => {
+            const newUsers = [];
+            for (let i = 0; i < state.users.length; i++) {
+                if (state.users[i].username !== username) {
+                    newUsers.push(state.users[i]);
+                }
+            }
+            state.users = newUsers;
+            await saveToCloud('users', state.users);
+            renderUsers();
+            showToast("Konto gelöscht.");
+            
+            // Falls man sich selbst löscht
+            const currentSession = JSON.parse(localStorage.getItem('sc_user'));
+            if(currentSession && currentSession.username === username) {
+                handleLogout();
+            }
+        });
+    }
+
+    // ================= UI HELPERS =================
 
     function updateThemeUI() {
         const isDark = document.documentElement.classList.contains('dark');
@@ -607,7 +742,8 @@
 
     function updateActiveNav(id) {
         const sections = ['roadmap', 'daily', 'planning', 'inventory'];
-        sections.forEach(s => {
+        for(let i=0; i<sections.length; i++) {
+            const s = sections[i];
             const btnDesk = document.getElementById('btn-desk-' + s);
             if(btnDesk) {
                 if (s === id) {
@@ -623,14 +759,14 @@
                 if (s === id) btnMob.classList.add('active');
                 else btnMob.classList.remove('active');
             }
-        });
+        }
     }
 
     function showSection(id) {
         const sections = ['roadmap', 'daily', 'planning', 'inventory'];
-        sections.forEach(s => {
-            document.getElementById('section-' + s).classList.toggle('hidden', id !== s);
-        });
+        for(let i=0; i<sections.length; i++) {
+            document.getElementById('section-' + sections[i]).classList.toggle('hidden', id !== sections[i]);
+        }
         
         updateActiveNav(id);
 
@@ -698,7 +834,8 @@
             return;
         }
 
-        state.savedMenus.forEach(menu => {
+        for (let i = 0; i < state.savedMenus.length; i++) {
+            const menu = state.savedMenus[i];
             const btn = document.createElement('button');
             btn.onclick = () => addToPosTicket(menu.id);
             btn.className = "pos-btn bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-2xl p-3 md:p-4 text-left hover:border-orange-300 dark:hover:border-orange-700 hover:shadow-md transition flex flex-col justify-between min-h-[80px] md:min-h-[100px]";
@@ -707,7 +844,7 @@
                 <span class="mt-2 inline-flex items-center text-[10px] md:text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-md self-start"><i class="fas fa-plus mr-1"></i> Bon</span>
             `;
             grid.appendChild(btn);
-        });
+        }
         renderPosTicket();
     }
 
@@ -733,12 +870,18 @@
         const ticketKeys = Object.keys(state.posTicket);
         let totalItems = 0;
 
-        ticketKeys.forEach(mId => {
+        for (let i = 0; i < ticketKeys.length; i++) {
+            const mId = ticketKeys[i];
             const count = state.posTicket[mId];
             totalItems += count;
 
-            let menu = state.savedMenus.find(m => m.id == mId);
-            let menuName = menu ? menu.name : "Unbekannt";
+            let menuName = "Unbekannt";
+            for (let j = 0; j < state.savedMenus.length; j++) {
+                if (state.savedMenus[j].id == mId) {
+                    menuName = state.savedMenus[j].name;
+                    break;
+                }
+            }
 
             const div = document.createElement('div');
             div.className = "flex justify-between items-center bg-white dark:bg-gray-800 p-2 md:p-3 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm";
@@ -752,7 +895,7 @@
                 </button>
             `;
             list.appendChild(div);
-        });
+        }
 
         if (totalItems === 0) {
             list.innerHTML = `
@@ -773,22 +916,32 @@
         if (ticketKeys.length === 0) return;
 
         let totalSales = 0;
-        ticketKeys.forEach(mId => {
+        for (let i = 0; i < ticketKeys.length; i++) {
+            let mId = ticketKeys[i];
             let count = state.posTicket[mId];
             totalSales += count;
-            let menu = state.savedMenus.find(m => m.id == mId);
+            
+            let menu = null;
+            for (let j = 0; j < state.savedMenus.length; j++) {
+                if (state.savedMenus[j].id == mId) {
+                    menu = state.savedMenus[j];
+                    break;
+                }
+            }
 
             if (menu) {
-                menu.courses.forEach(course => {
-                    course.ingredients.forEach(ing => {
-                        if (!ing.name || !state.inventory[ing.name]) return;
+                for(let c = 0; c < menu.courses.length; c++) {
+                    const course = menu.courses[c];
+                    for(let ig = 0; ig < course.ingredients.length; ig++) {
+                        const ing = course.ingredients[ig];
+                        if (!ing.name || !state.inventory[ing.name]) continue;
                         const deduction = ing.amount * count;
                         state.inventory[ing.name].qty -= deduction;
                         if (state.inventory[ing.name].qty < 0) state.inventory[ing.name].qty = 0;
-                    });
-                });
+                    }
+                }
             }
-        });
+        }
 
         state.posTicket = {}; 
         await saveToCloud('inventory', state.inventory);
@@ -836,16 +989,27 @@
     }
 
     async function toggleEventDone(id) {
-        let event = state.roadmapEvents.find(e => e.id === id);
-        if (event) event.done = !event.done;
-        
+        for (let i = 0; i < state.roadmapEvents.length; i++) {
+            if(state.roadmapEvents[i].id === id) {
+                state.roadmapEvents[i].done = !state.roadmapEvents[i].done;
+                break;
+            }
+        }
         await saveToCloud('roadmapEvents', state.roadmapEvents);
         renderRoadmap();
     }
 
     function requestDeleteEvent(id) {
+        if(!isAdmin) return showToast("Dazu hast du keine Berechtigung", "error");
+
         openConfirmDialog("Tisch löschen?", "Möchtest du diese Reservierung entfernen?", async () => {
-            state.roadmapEvents = state.roadmapEvents.filter(e => e.id !== id);
+            const newEvents = [];
+            for (let i = 0; i < state.roadmapEvents.length; i++) {
+                if (state.roadmapEvents[i].id !== id) {
+                    newEvents.push(state.roadmapEvents[i]);
+                }
+            }
+            state.roadmapEvents = newEvents;
             await saveToCloud('roadmapEvents', state.roadmapEvents);
             renderRoadmap();
             showToast("Tisch entfernt.");
@@ -855,7 +1019,13 @@
     function requestClearRoadmap() {
         const currentDate = document.getElementById('roadmap-date-selector').value || getTodayString();
         openConfirmDialog("Tag leeren?", `Möchtest du den Ablaufplan für den ${currentDate} löschen?`, async () => {
-            state.roadmapEvents = state.roadmapEvents.filter(e => e.date !== currentDate);
+            const newEvents = [];
+            for (let i = 0; i < state.roadmapEvents.length; i++) {
+                if (state.roadmapEvents[i].date !== currentDate) {
+                    newEvents.push(state.roadmapEvents[i]);
+                }
+            }
+            state.roadmapEvents = newEvents;
             await saveToCloud('roadmapEvents', state.roadmapEvents);
             renderRoadmap();
             showToast(`Tag geleert.`);
@@ -863,9 +1033,12 @@
     }
 
     async function assignMenuToEvent(eventId, menuId) {
-        let event = state.roadmapEvents.find(e => e.id === eventId);
-        if (event) event.menuId = menuId || null;
-        
+        for (let i = 0; i < state.roadmapEvents.length; i++) {
+            if(state.roadmapEvents[i].id === eventId) {
+                state.roadmapEvents[i].menuId = menuId || null;
+                break;
+            }
+        }
         await saveToCloud('roadmapEvents', state.roadmapEvents);
         renderRoadmap(); 
     }
@@ -875,7 +1048,12 @@
         const selectedDate = document.getElementById('roadmap-date-selector').value;
         container.innerHTML = '';
 
-        let dailyEvents = state.roadmapEvents.filter(e => e.date === selectedDate);
+        const dailyEvents = [];
+        for (let i = 0; i < state.roadmapEvents.length; i++) {
+            if(state.roadmapEvents[i].date === selectedDate) {
+                dailyEvents.push(state.roadmapEvents[i]);
+            }
+        }
 
         if (dailyEvents.length === 0) {
             container.className = "space-y-6 md:space-y-12 relative";
@@ -889,7 +1067,8 @@
 
         container.className = "space-y-6 md:space-y-12 relative before:hidden md:before:block before:absolute before:inset-0 before:ml-[50%] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-100 before:via-blue-300 dark:before:from-gray-800 dark:before:via-gray-600 before:to-transparent";
 
-        dailyEvents.forEach(event => {
+        for (let i = 0; i < dailyEvents.length; i++) {
+            const event = dailyEvents[i];
             const isDone = event.done;
             const tableDisplay = event.table !== '?' ? `Tisch ${event.table}` : 'Offener Tisch';
             
@@ -897,39 +1076,43 @@
             selectHTML += `<option value="">-- Kein Menü zugewiesen --</option>`;
             
             let assignedMenu = null;
-            state.savedMenus.forEach(menu => {
+            for (let j = 0; j < state.savedMenus.length; j++) {
+                const menu = state.savedMenus[j];
                 const isSelected = event.menuId == menu.id ? "selected" : "";
                 selectHTML += `<option value="${menu.id}" ${isSelected}>${menu.name}</option>`;
                 if (isSelected) assignedMenu = menu;
-            });
+            }
             selectHTML += `</select>`;
 
             let ingredientsHTML = '';
             if (assignedMenu) {
                 const eventIngredients = {};
-                assignedMenu.courses.forEach(course => {
-                    course.ingredients.forEach(ing => {
-                        if (!ing.name) return;
+                for (let c = 0; c < assignedMenu.courses.length; c++) {
+                    const course = assignedMenu.courses[c];
+                    for (let ig = 0; ig < course.ingredients.length; ig++) {
+                        const ing = course.ingredients[ig];
+                        if (!ing.name) continue;
                         const total = ing.amount * event.guests;
                         if (eventIngredients[ing.name]) {
                             eventIngredients[ing.name].amount += total;
                         } else {
                             eventIngredients[ing.name] = { amount: total, unit: ing.unit };
                         }
-                    });
-                });
+                    }
+                }
                 
                 const ingKeys = Object.keys(eventIngredients);
                 if (ingKeys.length > 0) {
                     ingredientsHTML += `<ul class="text-[11px] md:text-sm space-y-1.5 md:space-y-2 max-h-32 md:max-h-48 overflow-y-auto custom-scrollbar pr-2 md:pr-3">`;
-                    ingKeys.forEach(prod => {
+                    for(let k=0; k<ingKeys.length; k++) {
+                        const prod = ingKeys[k];
                         const data = eventIngredients[prod];
                         ingredientsHTML += `
                             <li class="flex justify-between items-center border-b border-gray-200 dark:border-gray-600/50 pb-1.5 md:pb-2 last:border-0">
                                 <span class="dark:text-gray-300 font-medium">${prod}</span>
                                 <span class="font-bold text-blue-600 dark:text-blue-400 text-sm md:text-base">${data.amount} <span class="text-[10px] md:text-xs text-gray-500">${data.unit}</span></span>
                             </li>`;
-                    });
+                    }
                     ingredientsHTML += `</ul>`;
                 } else {
                     ingredientsHTML = `<p class="text-xs md:text-sm text-gray-400 italic">Keine Zutaten definiert.</p>`;
@@ -948,6 +1131,13 @@
             const checkBtnHTML = isDone 
                 ? `<button onclick="toggleEventDone(${event.id})" class="text-green-500 hover:text-gray-400 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center shadow-inner bg-green-50 dark:bg-green-900/20" title="Wieder öffnen"><i class="fas fa-check-circle text-xl md:text-2xl"></i></button>`
                 : `<button onclick="toggleEventDone(${event.id})" class="text-gray-300 dark:text-gray-600 hover:text-green-500 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center" title="Als erledigt markieren"><i class="fas fa-check text-lg md:text-xl"></i></button>`;
+
+            const deleteBtnHtml = isAdmin 
+                ? `<div class="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-700 mx-0.5 md:mx-1"></div>
+                   <button onclick="requestDeleteEvent(${event.id})" class="text-gray-400 hover:text-red-500 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center" title="Tisch löschen">
+                       <i class="fas fa-trash-alt text-sm md:text-lg"></i>
+                   </button>` 
+                : ``;
 
             const div = document.createElement('div');
             div.className = `relative flex flex-col md:flex-row items-stretch w-full gap-4 md:gap-0 group ${opacityClass}`;
@@ -972,10 +1162,7 @@
                             </div>
                             <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900 p-1 md:p-1.5 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm">
                                 ${checkBtnHTML}
-                                <div class="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-700 mx-0.5 md:mx-1"></div>
-                                <button onclick="requestDeleteEvent(${event.id})" class="text-gray-400 hover:text-red-500 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center" title="Tisch löschen">
-                                    <i class="fas fa-trash-alt text-sm md:text-lg"></i>
-                                </button>
+                                ${deleteBtnHtml}
                             </div>
                         </div>
                         <div class="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 md:mb-5 bg-gray-50 dark:bg-gray-900 inline-flex px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl border dark:border-gray-700">
@@ -992,7 +1179,7 @@
                 </div>
             `;
             container.appendChild(div);
-        });
+        }
     }
 
     // ================= MENÜ-PLANER =================
@@ -1001,30 +1188,46 @@
         const grid = document.getElementById('template-grid');
         grid.innerHTML = '';
 
-        state.savedMenus.forEach(menu => {
+        for (let i = 0; i < state.savedMenus.length; i++) {
+            const menu = state.savedMenus[i];
             const isActive = state.activeTemplateId === menu.id;
             const card = document.createElement('div');
             card.className = `template-card bg-white dark:bg-gray-800 border-2 rounded-2xl p-4 md:p-5 flex flex-col justify-between min-h-[120px] md:min-h-[140px] shadow-sm ${isActive ? 'active' : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600'}`;
-            card.onclick = () => loadTemplateForEditing(menu.id);
             
+            if (isAdmin) {
+                card.onclick = () => loadTemplateForEditing(menu.id);
+            } else {
+                card.classList.remove('cursor-pointer', 'hover:border-purple-300', 'dark:hover:border-purple-600');
+                card.classList.add('cursor-default');
+            }
+            
+            const deleteBtn = isAdmin ? `
+                <div class="flex justify-end mt-3 md:mt-4">
+                    <button onclick="event.stopPropagation(); requestDeleteTemplate(${menu.id})" class="w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center transition">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </div>` : '';
+
             card.innerHTML = `
                 <div>
                     <h4 class="font-black text-base md:text-lg text-gray-800 dark:text-white leading-tight mb-1.5 md:mb-2 line-clamp-2">${menu.name}</h4>
                     <span class="text-xs md:text-sm text-gray-500 font-bold bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md md:rounded-lg">${menu.courses.length} Komponente(n)</span>
                 </div>
-                <div class="flex justify-end mt-3 md:mt-4">
-                    <button onclick="event.stopPropagation(); requestDeleteTemplate(${menu.id})" class="w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center transition">
-                        <i class="fas fa-trash text-sm"></i>
-                    </button>
-                </div>
+                ${deleteBtn}
             `;
             grid.appendChild(card);
-        });
+        }
     }
 
     function requestDeleteTemplate(id) {
         openConfirmDialog("Löschen?", "Möchtest du dieses Gericht / Menü löschen?", async () => {
-            state.savedMenus = state.savedMenus.filter(m => m.id !== id);
+            const newMenus = [];
+            for (let i = 0; i < state.savedMenus.length; i++) {
+                if (state.savedMenus[i].id !== id) {
+                    newMenus.push(state.savedMenus[i]);
+                }
+            }
+            state.savedMenus = newMenus;
             if (state.activeTemplateId === id) closeTemplateEditor();
             else renderTemplateGrid();
             
@@ -1045,15 +1248,23 @@
                 startNewTemplate();
             }
         } else {
-            let template = state.savedMenus.find(m => m.id == val);
+            let template = null;
+            for (let i = 0; i < state.savedMenus.length; i++) {
+                if (state.savedMenus[i].id == val) {
+                    template = state.savedMenus[i];
+                    break;
+                }
+            }
             if (template) {
                 state.activeTemplateId = template.id;
                 state.activeTemplateCourses = JSON.parse(JSON.stringify(template.courses));
-                state.activeTemplateCourses.forEach(c => {
-                    c.ingredients.forEach(ing => {
-                        if (ing.category === undefined) ing.category = '';
-                    });
-                });
+                for (let c = 0; c < state.activeTemplateCourses.length; c++) {
+                    for (let ig = 0; ig < state.activeTemplateCourses[c].ingredients.length; ig++) {
+                        if (state.activeTemplateCourses[c].ingredients[ig].category === undefined) {
+                            state.activeTemplateCourses[c].ingredients[ig].category = '';
+                        }
+                    }
+                }
                 document.getElementById('active-template-name').value = template.name;
                 openTemplateEditor();
             }
@@ -1087,7 +1298,13 @@
         if (state.activeTemplateCourses.length === 0) { showToast("Bitte füge Komponenten hinzu.", "error"); return; }
 
         if (state.activeTemplateId) {
-            let idx = state.savedMenus.findIndex(m => m.id === state.activeTemplateId);
+            let idx = -1;
+            for (let i = 0; i < state.savedMenus.length; i++) {
+                if(state.savedMenus[i].id === state.activeTemplateId) {
+                    idx = i;
+                    break;
+                }
+            }
             if (idx !== -1) {
                 state.savedMenus[idx].name = nameInput;
                 state.savedMenus[idx].courses = JSON.parse(JSON.stringify(state.activeTemplateCourses));
@@ -1117,13 +1334,26 @@
 
     function requestRemoveCourse(id) {
         openConfirmDialog("Löschen?", "Möchtest du diese Komponente entfernen?", () => {
-            state.activeTemplateCourses = state.activeTemplateCourses.filter(c => c.id !== id);
+            const newCourses = [];
+            for (let i = 0; i < state.activeTemplateCourses.length; i++) {
+                if (state.activeTemplateCourses[i].id !== id) {
+                    newCourses.push(state.activeTemplateCourses[i]);
+                }
+            }
+            state.activeTemplateCourses = newCourses;
             renderCourses();
         });
     }
 
     function getProductsByCategory(cat) {
-        return Object.keys(state.inventory).filter(k => state.inventory[k].category === cat).sort();
+        const result = [];
+        const keys = Object.keys(state.inventory);
+        for(let i=0; i<keys.length; i++) {
+            if(state.inventory[keys[i]].category === cat) {
+                result.push(keys[i]);
+            }
+        }
+        return result.sort();
     }
 
     function renderCourses() {
@@ -1142,20 +1372,22 @@
                 
                 let catSelectHtml = `<select onchange="updateIngCat(${course.id}, ${i}, this.value)" class="w-full sm:w-1/3 sm:min-w-[140px] bg-white dark:bg-gray-800 dark:text-white font-bold text-xs md:text-sm outline-none border border-gray-200 dark:border-gray-600 rounded-lg p-2 md:p-2.5 focus:ring-2 focus:ring-purple-400">`;
                 catSelectHtml += `<option value="">-- Kategorie --</option>`;
-                allCategories.forEach(category => {
+                for(let k=0; k<allCategories.length; k++) {
+                    const category = allCategories[k];
                     const selected = activeCat === category ? 'selected' : '';
                     catSelectHtml += `<option value="${category}" ${selected}>${category}</option>`;
-                });
+                }
                 catSelectHtml += `</select>`;
 
                 let prodSelectHtml = `<select onchange="updateIngName(${course.id}, ${i}, this.value)" class="w-full sm:flex-1 bg-white dark:bg-gray-800 dark:text-white font-bold text-xs md:text-sm outline-none border border-gray-200 dark:border-gray-600 rounded-lg p-2 md:p-2.5 focus:ring-2 focus:ring-purple-400" ${!activeCat ? 'disabled' : ''}>`;
                 prodSelectHtml += `<option value="">-- Produkt --</option>`;
                 if(activeCat) {
                     const catProds = getProductsByCategory(activeCat);
-                    catProds.forEach(pName => {
+                    for(let p=0; p<catProds.length; p++) {
+                        const pName = catProds[p];
                         const selected = ing.name === pName ? 'selected' : '';
                         prodSelectHtml += `<option value="${pName}" ${selected}>${pName}</option>`;
-                    });
+                    }
                 }
                 prodSelectHtml += `</select>`;
 
@@ -1199,44 +1431,73 @@
     }
 
     function updateCourseName(id, val) { 
-        let course = state.activeTemplateCourses.find(c => c.id === id);
-        if (course) course.name = val;
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === id) {
+                state.activeTemplateCourses[i].name = val;
+                break;
+            }
+        }
     }
 
     function addIngredientToCourse(courseId) {
-        let course = state.activeTemplateCourses.find(c => c.id === courseId);
-        if (course) course.ingredients.push({ category: '', name: '', amount: 0, unit: 'g' });
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === courseId) {
+                state.activeTemplateCourses[i].ingredients.push({ category: '', name: '', amount: 0, unit: 'g' });
+                break;
+            }
+        }
         renderCourses();
     }
 
     function updateIngCat(cId, idx, val) {
-        let course = state.activeTemplateCourses.find(c => c.id === cId);
-        if (course && course.ingredients[idx]) {
-            course.ingredients[idx].category = val;
-            course.ingredients[idx].name = ''; 
-            course.ingredients[idx].unit = 'g';
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === cId) {
+                if(state.activeTemplateCourses[i].ingredients[idx]) {
+                    state.activeTemplateCourses[i].ingredients[idx].category = val;
+                    state.activeTemplateCourses[i].ingredients[idx].name = ''; 
+                    state.activeTemplateCourses[i].ingredients[idx].unit = 'g';
+                }
+                break;
+            }
         }
         renderCourses();
     }
 
     function updateIngName(cId, idx, val) {
-        let course = state.activeTemplateCourses.find(c => c.id === cId);
-        if (course && course.ingredients[idx]) {
-            course.ingredients[idx].name = val;
-            if(state.inventory[val]) course.ingredients[idx].unit = state.inventory[val].unit;
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === cId) {
+                if(state.activeTemplateCourses[i].ingredients[idx]) {
+                    state.activeTemplateCourses[i].ingredients[idx].name = val;
+                    if(state.inventory[val]) {
+                        state.activeTemplateCourses[i].ingredients[idx].unit = state.inventory[val].unit;
+                    }
+                }
+                break;
+            }
         }
         renderCourses(); 
     }
     
     function updateIngAmount(cId, idx, val) {
-        let course = state.activeTemplateCourses.find(c => c.id === cId);
-        if (course && course.ingredients[idx]) {
-            course.ingredients[idx].amount = parseFloat(val) || 0;
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === cId) {
+                if(state.activeTemplateCourses[i].ingredients[idx]) {
+                    state.activeTemplateCourses[i].ingredients[idx].amount = parseFloat(val) || 0;
+                }
+                break;
+            }
         }
     }
 
     function requestRemoveIng(courseId, idx) {
-        let course = state.activeTemplateCourses.find(c => c.id === courseId);
+        let course = null;
+        for(let i=0; i<state.activeTemplateCourses.length; i++) {
+            if(state.activeTemplateCourses[i].id === courseId) {
+                course = state.activeTemplateCourses[i];
+                break;
+            }
+        }
+        
         if (course && course.ingredients[idx]) {
             if (!course.ingredients[idx].name && course.ingredients[idx].amount === 0) {
                 course.ingredients.splice(idx, 1);
@@ -1294,17 +1555,21 @@
     }
     
     async function markCategoryAsOk(catName) {
-        Object.keys(state.inventory).forEach(k => {
+        const keys = Object.keys(state.inventory);
+        for(let i=0; i<keys.length; i++) {
+            const k = keys[i];
             if(state.inventory[k].category === catName && state.inventory[k].manualStatus !== 'order') {
                 state.inventory[k].manualStatus = 'ok';
             }
-        });
+        }
         await saveToCloud('inventory', state.inventory);
         calculateGesamtBedarf();
         showToast(`Kategorie als erledigt markiert.`);
     }
 
     function requestDeleteInventoryItem(prod) {
+        if(!isAdmin) return showToast("Dazu hast du keine Berechtigung", "error");
+
         openConfirmDialog("Löschen?", `Möchtest du "${prod}" komplett aus dem System entfernen?`, async () => {
             delete state.inventory[prod];
             await saveToCloud('inventory', state.inventory);
@@ -1317,21 +1582,34 @@
         const bedarfTotal = {};
         const selectedDate = document.getElementById('roadmap-date-selector').value;
 
-        state.roadmapEvents.forEach(event => {
+        for (let e = 0; e < state.roadmapEvents.length; e++) {
+            const event = state.roadmapEvents[e];
             if (event.date === selectedDate && event.menuId) {
-                let menu = state.savedMenus.find(m => m.id == event.menuId);
+                let menu = null;
+                for(let m = 0; m < state.savedMenus.length; m++) {
+                    if(state.savedMenus[m].id == event.menuId) {
+                        menu = state.savedMenus[m];
+                        break;
+                    }
+                }
+                
                 if (menu) {
-                    menu.courses.forEach(course => {
-                        course.ingredients.forEach(ing => {
-                            if (!ing.name) return;
+                    for(let c = 0; c < menu.courses.length; c++) {
+                        const course = menu.courses[c];
+                        for(let ig = 0; ig < course.ingredients.length; ig++) {
+                            const ing = course.ingredients[ig];
+                            if (!ing.name) continue;
                             const total = ing.amount * event.guests;
-                            if (bedarfTotal[ing.name]) bedarfTotal[ing.name] += total;
-                            else bedarfTotal[ing.name] = total;
-                        });
-                    });
+                            if (bedarfTotal[ing.name]) {
+                                bedarfTotal[ing.name] += total;
+                            } else {
+                                bedarfTotal[ing.name] = total;
+                            }
+                        }
+                    }
                 }
             }
-        });
+        }
 
         renderInventoryCheck(bedarfTotal);
     }
@@ -1346,8 +1624,14 @@
         listWarning.innerHTML = '';
         
         const searchVal = document.getElementById('inv-search').value.toLowerCase();
-        const allItemsSet = new Set([...Object.keys(state.inventory), ...Object.keys(bedarf)]);
-        const allItemsArray = Array.from(allItemsSet).sort((a,b) => a.localeCompare(b));
+        
+        const allItemsSet = {};
+        const invKeys = Object.keys(state.inventory);
+        for(let i=0; i<invKeys.length; i++) allItemsSet[invKeys[i]] = true;
+        const bedarfKeys = Object.keys(bedarf);
+        for(let i=0; i<bedarfKeys.length; i++) allItemsSet[bedarfKeys[i]] = true;
+        
+        const allItemsArray = Object.keys(allItemsSet).sort((a,b) => a.localeCompare(b));
 
         let hasOrderItems = false;
         let hasWarningItems = false;
@@ -1434,7 +1718,8 @@
         document.getElementById('warning-section').classList.toggle('hidden', !hasWarningItems);
         
         const catKeys = Object.keys(categoriesOk).sort();
-        catKeys.forEach(catName => {
+        for(let i=0; i<catKeys.length; i++) {
+            const catName = catKeys[i];
             const catHeader = document.createElement('tr');
             catHeader.className = "bg-indigo-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 flex md:table-row items-center justify-between p-3 md:p-0";
             catHeader.innerHTML = `
@@ -1448,9 +1733,16 @@
             listOk.appendChild(catHeader);
             
             const prods = categoriesOk[catName];
-            prods.forEach(item => {
+            for(let j=0; j<prods.length; j++) {
+                const item = prods[j];
                 const btnOkClass = item.manualStat === 'ok' ? 'bg-green-500 text-white shadow-inner' : 'bg-gray-100 text-gray-400 hover:bg-green-100 hover:text-green-500 dark:bg-gray-700 dark:text-gray-300';
                 const btnOrderClass = 'bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-500 dark:bg-gray-700 dark:text-gray-300';
+
+                const deleteBtnHtml = isAdmin ? `
+                    <div class="w-px h-10 bg-gray-200 dark:bg-gray-700 mx-1 hidden md:block"></div>
+                    <button onclick="requestDeleteInventoryItem('${item.prod}')" class="w-10 h-10 rounded-lg md:rounded-xl flex items-center justify-center transition bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-600 dark:bg-gray-700 dark:text-gray-300 shrink-0" title="Produkt löschen">
+                        <i class="fas fa-trash-alt text-[10px] md:text-sm"></i>
+                    </button>` : '';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/40 transition border-b border-gray-100 dark:border-gray-700/50 last:border-0 flex flex-col md:table-row p-4 md:p-0";
@@ -1485,16 +1777,13 @@
                                     <i class="fas fa-times text-xs md:text-base"></i>
                                 </button>
                             </div>
-                            <div class="w-px h-10 bg-gray-200 dark:bg-gray-700 mx-1 hidden md:block"></div>
-                            <button onclick="requestDeleteInventoryItem('${item.prod}')" class="w-10 h-10 rounded-lg md:rounded-xl flex items-center justify-center transition bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-600 dark:bg-gray-700 dark:text-gray-300 shrink-0" title="Produkt löschen">
-                                <i class="fas fa-trash-alt text-[10px] md:text-sm"></i>
-                            </button>
+                            ${deleteBtnHtml}
                         </div>
                     </td>
                 `;
                 listOk.appendChild(tr);
-            });
-        });
+            }
+        }
 
         if (!hasOrderItems) {
             listOrder.innerHTML = `
