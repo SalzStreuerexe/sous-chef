@@ -58,7 +58,9 @@
         .nav-btn.active .nav-icon-bg { background-color: #eff6ff; }
         .dark .nav-btn.active .nav-icon-bg { background-color: rgba(30, 58, 138, 0.5); }
 
+        /* Steuerungsklassen für die Rollen */
         .admin-only { transition: all 0.3s; }
+        .koch-admin-only { transition: all 0.3s; }
     </style>
 </head>
 
@@ -139,13 +141,20 @@
                     <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-600 flex items-center justify-center mr-3"><i class="fas fa-fire"></i></div>
                     Live-Service
                 </button>
-                <button onclick="showSection('planning')" id="btn-desk-planning" class="desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
+                <!-- Nur sichtbar für Koch und Admin -->
+                <button onclick="showSection('planning')" id="btn-desk-planning" class="koch-admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-600 flex items-center justify-center mr-3"><i class="fas fa-book-open"></i></div>
                     Menüs
                 </button>
-                <button onclick="showSection('inventory')" id="btn-desk-inventory" class="desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
+                <!-- Nur sichtbar für Koch und Admin -->
+                <button onclick="showSection('inventory')" id="btn-desk-inventory" class="koch-admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
                     <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/50 text-green-600 flex items-center justify-center mr-3"><i class="fas fa-boxes"></i></div>
                     Lager & Check
+                </button>
+                <!-- Nur sichtbar für Admin -->
+                <button onclick="showSection('accounts')" id="btn-desk-accounts" class="admin-only desk-nav-btn flex items-center w-full px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl transition font-bold border border-transparent shadow-sm">
+                    <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/50 text-red-600 flex items-center justify-center mr-3"><i class="fas fa-users-cog"></i></div>
+                    Konten
                 </button>
             </nav>
         </div>
@@ -210,7 +219,8 @@
                     </button>
                 </div>
 
-                <div id="roadmap-timeline" class="space-y-6 md:space-y-12 relative"></div>
+                <div id="roadmap-timeline" class="space-y-6 md:space-y-12 relative">
+                </div>
             </section>
 
             <section id="section-daily" class="hidden glass-card rounded-3xl p-4 md:p-6 shadow-2xl border dark:border-gray-700 md:h-[calc(100vh-8rem)] flex flex-col">
@@ -222,7 +232,8 @@
                 <div class="flex flex-col md:flex-row gap-4 md:gap-6 flex-1 min-h-0">
                     <div class="w-full md:w-2/3 flex flex-col h-[40vh] md:h-auto">
                         <h3 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 md:mb-3 ml-1">Speisekarte (Antippen)</h3>
-                        <div id="pos-menu-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 overflow-y-auto custom-scrollbar pr-1 md:pr-2 pb-2 md:pb-4 flex-1 content-start"></div>
+                        <div id="pos-menu-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 overflow-y-auto custom-scrollbar pr-1 md:pr-2 pb-2 md:pb-4 flex-1 content-start">
+                        </div>
                     </div>
 
                     <div class="w-full md:w-1/3 flex flex-col bg-white dark:bg-gray-800 rounded-3xl border-2 border-orange-100 dark:border-orange-900/30 shadow-lg overflow-hidden h-[45vh] md:h-auto">
@@ -232,7 +243,8 @@
                             </h3>
                         </div>
                         
-                        <div id="pos-ticket-items" class="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
+                        <div id="pos-ticket-items" class="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]">
+                        </div>
 
                         <div class="p-3 md:p-4 bg-gray-50 dark:bg-gray-900/80 border-t border-gray-200 dark:border-gray-700 shrink-0">
                             <button onclick="requestBookTicket()" id="pos-book-btn" class="w-full py-3 md:py-4 bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-500 rounded-xl font-black text-lg md:text-xl transition flex items-center justify-center" disabled>
@@ -249,14 +261,15 @@
                     Gerichte & Menüs
                 </h2>
 
-                <div class="flex justify-center mb-6 md:mb-10 admin-only">
+                <div class="flex justify-center mb-6 md:mb-10 koch-admin-only">
                     <div onclick="loadTemplateForEditing('new')" class="template-card bg-purple-50 dark:bg-purple-900/20 border-2 border-dashed border-purple-400 dark:border-purple-600 rounded-2xl md:rounded-3xl p-4 md:p-6 w-full max-w-md flex flex-col items-center justify-center text-center shadow-md hover:bg-purple-100 dark:hover:bg-purple-900/40">
                         <i class="fas fa-plus-circle text-3xl md:text-4xl text-purple-500 mb-2 md:mb-3"></i>
                         <span class="font-black text-lg md:text-xl text-purple-700 dark:text-purple-300">Neues Gericht anlegen</span>
                     </div>
                 </div>
 
-                <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8"></div>
+                <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+                </div>
 
                 <div id="template-editor-area" class="hidden mt-6 md:mt-10">
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border-2 border-purple-200 dark:border-purple-800 shadow-2xl p-4 md:p-8 relative">
@@ -274,7 +287,8 @@
                             </button>
                         </div>
 
-                        <div id="course-container" class="space-y-4 md:space-y-8"></div>
+                        <div id="course-container" class="space-y-4 md:space-y-8">
+                        </div>
 
                         <button onclick="addNewCourse()" class="mt-6 md:mt-8 w-full py-4 md:py-5 border-2 border-dashed border-purple-300 dark:border-purple-700 text-purple-600 dark:text-purple-400 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 font-bold text-base md:text-xl transition flex items-center justify-center shadow-sm">
                             <i class="fas fa-plus-circle mr-2 md:mr-3"></i> Komponente hinzufügen
@@ -293,39 +307,6 @@
                     <div class="relative w-full md:w-72">
                         <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
                         <input type="text" id="inv-search" onkeyup="calculateGesamtBedarf()" placeholder="Lager durchsuchen..." class="pl-11 p-3 w-full rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-green-500 transition shadow-sm font-medium text-sm md:text-base">
-                    </div>
-                </div>
-
-                <div class="admin-only mb-8">
-                    <h3 class="text-lg md:text-xl font-black text-blue-600 dark:text-blue-400 mb-3 md:mb-4 flex items-center uppercase tracking-wide">
-                        <i class="fas fa-users-cog mr-2 md:mr-3"></i> System-Konten
-                    </h3>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 overflow-hidden shadow-sm p-4 md:p-5">
-                        <div class="flex flex-col lg:flex-row gap-3 items-end mb-6">
-                            <div class="w-full flex gap-3 lg:contents">
-                                <div class="w-1/2 lg:flex-1">
-                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Benutzername</label>
-                                    <input type="text" id="new-user-name" placeholder="z.B. service1" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
-                                </div>
-                                <div class="w-1/2 lg:flex-1">
-                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Passwort</label>
-                                    <input type="text" id="new-user-pass" placeholder="z.B. 1234" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
-                                </div>
-                            </div>
-                            <div class="w-full flex gap-3 lg:w-auto">
-                                <div class="flex-1 lg:w-48">
-                                    <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Rolle</label>
-                                    <select id="new-user-role" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition font-bold text-sm">
-                                        <option value="service">Kellner (Service)</option>
-                                        <option value="admin">Admin (Chef)</option>
-                                    </select>
-                                </div>
-                                <button onclick="createNewUser()" class="px-6 py-2.5 md:py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/30 flex justify-center items-center mt-1 lg:mt-0">
-                                    <i class="fas fa-user-plus lg:mr-0 mr-2"></i> <span class="lg:hidden">Konto anlegen</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="users-list" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700"></div>
                     </div>
                 </div>
 
@@ -392,7 +373,8 @@
                             <div class="col-span-3">Neuer Bestand</div>
                             <div class="col-span-3 text-right">Aktion</div>
                         </div>
-                        <div id="inventory-list-order" class="flex flex-col divide-y divide-red-50 dark:divide-red-900/30"></div>
+                        <div id="inventory-list-order" class="flex flex-col divide-y divide-red-50 dark:divide-red-900/30">
+                        </div>
                     </div>
                 </div>
 
@@ -407,7 +389,8 @@
                             <div class="col-span-2">Min. Grenze</div>
                             <div class="col-span-3 text-right">Aktion</div>
                         </div>
-                        <div id="inventory-list-warning" class="flex flex-col divide-y divide-yellow-50 dark:divide-yellow-900/30"></div>
+                        <div id="inventory-list-warning" class="flex flex-col divide-y divide-yellow-50 dark:divide-yellow-900/30">
+                        </div>
                     </div>
                 </div>
 
@@ -423,10 +406,50 @@
                             <div class="col-span-2">Min.</div>
                             <div class="col-span-2 text-right">Aktionen</div>
                         </div>
-                        <div id="inventory-list-ok" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700/50"></div>
+                        <div id="inventory-list-ok" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700/50">
+                        </div>
                     </div>
                 </div>
+            </section>
 
+            <!-- NEUE SEKTION: KONTEN (Nur Admin) -->
+            <section id="section-accounts" class="hidden glass-card rounded-3xl p-4 md:p-6 shadow-2xl border dark:border-gray-700">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-3 md:gap-4">
+                    <h2 class="text-2xl md:text-3xl font-black text-gray-800 dark:text-white flex items-center">
+                        <span class="bg-red-500 text-white w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center mr-3 md:mr-4 shadow-lg text-sm md:text-base"><i class="fas fa-users-cog"></i></span>
+                        System-Konten
+                    </h2>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-md p-4 md:p-5">
+                    <h3 class="font-bold mb-4 dark:text-white text-xs md:text-sm uppercase tracking-wider text-gray-500">Neuen Benutzer anlegen</h3>
+                    <div class="flex flex-col lg:flex-row gap-3 items-end mb-6">
+                        <div class="w-full flex gap-3 lg:contents">
+                            <div class="w-1/2 lg:flex-1">
+                                <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Benutzername</label>
+                                <input type="text" id="new-user-name" placeholder="z.B. service1" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-red-500 transition font-bold text-sm">
+                            </div>
+                            <div class="w-1/2 lg:flex-1">
+                                <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Passwort</label>
+                                <input type="text" id="new-user-pass" placeholder="z.B. 1234" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-red-500 transition font-bold text-sm">
+                            </div>
+                        </div>
+                        <div class="w-full flex gap-3 lg:w-auto">
+                            <div class="flex-1 lg:w-48">
+                                <label class="block text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Rolle</label>
+                                <select id="new-user-role" class="w-full p-2.5 md:p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-red-500 transition font-bold text-sm">
+                                    <option value="service">Kellner (Service)</option>
+                                    <option value="koch">Koch</option>
+                                    <option value="admin">Admin (Chef)</option>
+                                </select>
+                            </div>
+                            <button onclick="createNewUser()" class="px-6 py-2.5 md:py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-lg hover:shadow-red-500/30 flex justify-center items-center mt-1 lg:mt-0">
+                                <i class="fas fa-user-plus lg:mr-0 mr-2"></i> <span class="lg:hidden">Konto anlegen</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="users-list" class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700"></div>
+                </div>
             </section>
 
         </div>
@@ -441,13 +464,20 @@
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-fire text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Live</span>
         </button>
-        <button onclick="showSection('planning')" id="btn-mob-planning" class="nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
+        <!-- Nur sichtbar für Koch und Admin -->
+        <button onclick="showSection('planning')" id="btn-mob-planning" class="koch-admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-book-open text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Menüs</span>
         </button>
-        <button onclick="showSection('inventory')" id="btn-mob-inventory" class="nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
+        <!-- Nur sichtbar für Koch und Admin -->
+        <button onclick="showSection('inventory')" id="btn-mob-inventory" class="koch-admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
             <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-boxes text-lg"></i></div>
             <span class="text-[10px] font-bold uppercase tracking-wide">Lager</span>
+        </button>
+        <!-- Nur sichtbar für Admin -->
+        <button onclick="showSection('accounts')" id="btn-mob-accounts" class="admin-only nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 transition">
+            <div class="nav-icon-bg w-10 h-10 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-users-cog text-lg"></i></div>
+            <span class="text-[10px] font-bold uppercase tracking-wide">Konten</span>
         </button>
     </nav>
 </div>
@@ -455,14 +485,13 @@
 <script>
     // ================= SUPABASE KONFIGURATION =================
     // TODO: Trage deine echte Projekt-URL ein!
-    const SUPABASE_URL = "https://vgpwfpfghegpkcaquxie.supabase.co";
+    const SUPABASE_URL = "DEINE_SUPABASE_URL";
     // TODO: Trage deinen echten Anon-Key ein!
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncHdmcGZnaGVncGtjYXF1eGllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjQ3MDcsImV4cCI6MjA5NjIwMDcwN30.k_qHwoIfCPVfgHsyaD6kxRO3e1OwhDqhrWMfzs4BLgk";
+    const SUPABASE_KEY = "DEIN_ANON_KEY";
 
-    // Supabase Client initialisieren
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let isAdmin = false; 
+    let userRole = 'service'; // Standardrolle vor Login
 
     const defaultProds = {
         "Salz (fein)": { qty: 5000, unit: "g", category: "Gewürze", manualStatus: 'none', minQty: 1000 },
@@ -497,7 +526,8 @@
         return [year, month, day].join('-');
     }
 
-    // EIGENES IN-APP AUTH SYSTEM
+    // ================= EIGENES IN-APP AUTH SYSTEM =================
+    
     function checkSession() {
         updateThemeUI();
         const storedUser = localStorage.getItem('sc_user');
@@ -522,7 +552,6 @@
             
             let usersList = [];
             if (error || !data) {
-                // Erstes mal überhaupt -> Erstelle Standard Admin
                 usersList = [{ username: 'chef', pass: '1234', role: 'admin' }];
                 await db.from('app_state').insert({ key: 'users', data: usersList });
             } else {
@@ -565,18 +594,28 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             
-            isAdmin = (userObj.role === 'admin');
+            userRole = userObj.role;
             
             const roleBadge = document.getElementById('user-role-badge');
-            if(isAdmin) {
+            const adminElements = document.querySelectorAll('.admin-only');
+            const kochAdminElements = document.querySelectorAll('.koch-admin-only');
+            
+            // Erstmal alles einblenden (Reset)
+            for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = '';
+            for(let i=0; i<kochAdminElements.length; i++) kochAdminElements[i].style.display = '';
+            
+            // Ansicht basierend auf Rolle zuschneiden
+            if(userRole === 'admin') {
                 roleBadge.innerHTML = `<i class="fas fa-crown text-yellow-500 mr-1"></i> Admin (${userObj.username})`;
+            } else if(userRole === 'koch') {
+                roleBadge.innerHTML = `<i class="fas fa-fire text-orange-500 mr-1"></i> Koch (${userObj.username})`;
+                for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = 'none';
             } else {
-                roleBadge.innerHTML = `<i class="fas fa-concierge-bell text-blue-500 mr-1"></i> Service (${userObj.username})`;
-                const adminElements = document.querySelectorAll('.admin-only');
-                for(let i=0; i<adminElements.length; i++) {
-                    adminElements[i].style.display = 'none';
-                }
+                roleBadge.innerHTML = `<i class="fas fa-concierge-bell text-blue-500 mr-1"></i> Kellner (${userObj.username})`;
+                for(let i=0; i<adminElements.length; i++) adminElements[i].style.display = 'none';
+                for(let i=0; i<kochAdminElements.length; i++) kochAdminElements[i].style.display = 'none';
             }
+
             initApp();
         }, 400);
     }
@@ -622,7 +661,7 @@
             showToast("Fehler beim Laden aus der Cloud!", "error");
         }
 
-        if(isAdmin) renderUsers();
+        if(userRole === 'admin') renderUsers();
         renderTemplateGrid();
         renderPosMenu();
         renderRoadmap();
@@ -636,7 +675,6 @@
                 .update({ data: jsonData, updated_at: new Date() })
                 .eq('key', key);
             
-            // Falls Key nicht existiert (z.B. wenn Tische vorher leer waren), lege ihn an
             if (error) {
                 await db.from('app_state').insert({ key: key, data: jsonData });
             }
@@ -657,9 +695,12 @@
             const div = document.createElement('div');
             div.className = "flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700 last:border-0";
             
-            const roleColor = u.role === 'admin' ? 'text-yellow-500' : 'text-blue-500';
-            const roleIcon = u.role === 'admin' ? 'fa-crown' : 'fa-concierge-bell';
-            const roleName = u.role === 'admin' ? 'Admin' : 'Service';
+            let roleColor = 'text-blue-500';
+            let roleIcon = 'fa-concierge-bell';
+            let roleName = 'Kellner';
+            
+            if (u.role === 'admin') { roleColor = 'text-red-500'; roleIcon = 'fa-crown'; roleName = 'Admin'; }
+            if (u.role === 'koch') { roleColor = 'text-orange-500'; roleIcon = 'fa-fire'; roleName = 'Koch'; }
             
             div.innerHTML = `
                 <div class="flex items-center gap-3">
@@ -686,7 +727,6 @@
         
         if(!name || !pass) return showToast("Bitte Name und Passwort eingeben", "error");
         
-        // Prüfen ob existiert
         for(let i=0; i<state.users.length; i++) {
             if(state.users[i].username === name) return showToast("Dieser Name existiert bereits", "error");
         }
@@ -716,7 +756,6 @@
             renderUsers();
             showToast("Konto gelöscht.");
             
-            // Falls man sich selbst löscht
             const currentSession = JSON.parse(localStorage.getItem('sc_user'));
             if(currentSession && currentSession.username === username) {
                 handleLogout();
@@ -741,7 +780,7 @@
     }
 
     function updateActiveNav(id) {
-        const sections = ['roadmap', 'daily', 'planning', 'inventory'];
+        const sections = ['roadmap', 'daily', 'planning', 'inventory', 'accounts'];
         for(let i=0; i<sections.length; i++) {
             const s = sections[i];
             const btnDesk = document.getElementById('btn-desk-' + s);
@@ -763,7 +802,7 @@
     }
 
     function showSection(id) {
-        const sections = ['roadmap', 'daily', 'planning', 'inventory'];
+        const sections = ['roadmap', 'daily', 'planning', 'inventory', 'accounts'];
         for(let i=0; i<sections.length; i++) {
             document.getElementById('section-' + sections[i]).classList.toggle('hidden', id !== sections[i]);
         }
@@ -1000,7 +1039,7 @@
     }
 
     function requestDeleteEvent(id) {
-        if(!isAdmin) return showToast("Dazu hast du keine Berechtigung", "error");
+        if(userRole !== 'admin') return showToast("Dazu hast du keine Berechtigung", "error");
 
         openConfirmDialog("Tisch löschen?", "Möchtest du diese Reservierung entfernen?", async () => {
             const newEvents = [];
@@ -1132,7 +1171,7 @@
                 ? `<button onclick="toggleEventDone(${event.id})" class="text-green-500 hover:text-gray-400 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center shadow-inner bg-green-50 dark:bg-green-900/20" title="Wieder öffnen"><i class="fas fa-check-circle text-xl md:text-2xl"></i></button>`
                 : `<button onclick="toggleEventDone(${event.id})" class="text-gray-300 dark:text-gray-600 hover:text-green-500 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center" title="Als erledigt markieren"><i class="fas fa-check text-lg md:text-xl"></i></button>`;
 
-            const deleteBtnHtml = isAdmin 
+            const deleteBtnHtml = userRole === 'admin' 
                 ? `<div class="w-px h-5 md:h-6 bg-gray-200 dark:bg-gray-700 mx-0.5 md:mx-1"></div>
                    <button onclick="requestDeleteEvent(${event.id})" class="text-gray-400 hover:text-red-500 transition w-8 h-8 md:w-10 md:h-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center" title="Tisch löschen">
                        <i class="fas fa-trash-alt text-sm md:text-lg"></i>
@@ -1194,14 +1233,14 @@
             const card = document.createElement('div');
             card.className = `template-card bg-white dark:bg-gray-800 border-2 rounded-2xl p-4 md:p-5 flex flex-col justify-between min-h-[120px] md:min-h-[140px] shadow-sm ${isActive ? 'active' : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600'}`;
             
-            if (isAdmin) {
+            if (userRole === 'admin' || userRole === 'koch') {
                 card.onclick = () => loadTemplateForEditing(menu.id);
             } else {
                 card.classList.remove('cursor-pointer', 'hover:border-purple-300', 'dark:hover:border-purple-600');
                 card.classList.add('cursor-default');
             }
             
-            const deleteBtn = isAdmin ? `
+            const deleteBtn = (userRole === 'admin' || userRole === 'koch') ? `
                 <div class="flex justify-end mt-3 md:mt-4">
                     <button onclick="event.stopPropagation(); requestDeleteTemplate(${menu.id})" class="w-8 h-8 md:w-9 md:h-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center transition">
                         <i class="fas fa-trash text-sm"></i>
@@ -1568,7 +1607,7 @@
     }
 
     function requestDeleteInventoryItem(prod) {
-        if(!isAdmin) return showToast("Dazu hast du keine Berechtigung", "error");
+        if(userRole !== 'admin') return showToast("Dazu hast du keine Berechtigung", "error");
 
         openConfirmDialog("Löschen?", `Möchtest du "${prod}" komplett aus dem System entfernen?`, async () => {
             delete state.inventory[prod];
@@ -1738,7 +1777,7 @@
                 const btnOkClass = item.manualStat === 'ok' ? 'bg-green-500 text-white shadow-inner' : 'bg-gray-100 text-gray-400 hover:bg-green-100 hover:text-green-500 dark:bg-gray-700 dark:text-gray-300';
                 const btnOrderClass = 'bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-500 dark:bg-gray-700 dark:text-gray-300';
 
-                const deleteBtnHtml = isAdmin ? `
+                const deleteBtnHtml = userRole === 'admin' ? `
                     <div class="w-px h-10 bg-gray-200 dark:bg-gray-700 mx-1 hidden md:block"></div>
                     <button onclick="requestDeleteInventoryItem('${item.prod}')" class="w-10 h-10 rounded-lg md:rounded-xl flex items-center justify-center transition bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-600 dark:bg-gray-700 dark:text-gray-300 shrink-0" title="Produkt löschen">
                         <i class="fas fa-trash-alt text-[10px] md:text-sm"></i>
